@@ -113,13 +113,5 @@ namespace ImportAndPreviewApi.Controllers
 				return InternalServerError(ex);
 			}
 		}
-
-		[HttpPost]
-		[Route("test")]
-		[AllowAnonymous]
-		public IHttpActionResult TestPost([FromBody]int number)
-		{
-			return Ok(number);
-		}
 	}
 }
