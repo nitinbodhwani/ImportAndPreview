@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web.Configuration;
 using System.Web.Http;
+using System.Web.Http.Cors;
 
 namespace ImportAndPreviewApi
 {
@@ -19,6 +21,11 @@ namespace ImportAndPreviewApi
 				routeTemplate: "api/{controller}/{id}",
 				defaults: new { id = RouteParameter.Optional }
 			);
+
+			string requestOriginUrl = WebConfigurationManager.AppSettings["requestOriginUrl"];
+			var corsAttr = new EnableCorsAttribute(requestOriginUrl, "*", "*");
+			config.EnableCors(corsAttr);
+			//config.EnableCors();
 		}
 	}
 }
