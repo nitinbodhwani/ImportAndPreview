@@ -79,6 +79,16 @@ namespace ImportAndPreviewApi.EntityModels
 		public string AlarmText { get; set; }
 
 		/// <summary>
+		/// Gets or sets Employee Name
+		/// </summary>
+		public string EmployeeName { get; set; }
+
+		/// <summary>
+		/// Gets or sets Employee Code
+		/// </summary>
+		public string EmployeeCode { get; set; }
+
+		/// <summary>
 		/// Foreign key Reference Model for Report Id
 		/// </summary>
 		public ReportEntity Report { get; set; }

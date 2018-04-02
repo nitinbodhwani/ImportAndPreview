@@ -20,15 +20,9 @@ namespace ImportAndPreviewApi.Repository
 		public IList<ReportData> GetReportDataByMonthAndYear(int month, int year) 
 		{
 			IList<ReportData> rptDataList = null;
-			//IList<ReportDataEntity> rptDataEntityList = null;
-			//ReportEntity rptEntity = null;
 
 			try
 			{
-				//rptEntity = db.Report.FirstOrDefault(report => report.Month == month && report.Year == year);
-
-				//if (rptEntity != null && rptEntity.ReportId > 0)
-				//{
 					rptDataList = (from rd in db.ReportData
 								   where rd.EventDateTime.Month == month
 										&& rd.EventDateTime.Year == year
@@ -69,20 +63,15 @@ namespace ImportAndPreviewApi.Repository
 		{
 			IList<ReportAggregate> rptAggregateList = new List<ReportAggregate>();
 
-			//ReportEntity rptEntity = null;
-
 			try
 			{
-				//rptEntity = db.Report.FirstOrDefault(report => report.Month == month && report.Year == year);
-
-				//if (rptEntity != null)
-				//{
 					var groupedItems = (from rd in db.ReportData
 										where //rd.ReportId == rptEntity.ReportId &&
 										rd.EventDateTime.Day == day
 										&& rd.EventDateTime.Month == month
 										&& rd.EventDateTime.Year == year
 										group rd by rd.CardNumber into rdGrouped
+										orderby rdGrouped.Key ascending
 										select new
 										{
 											groupingKey = rdGrouped.Key,
@@ -92,18 +81,18 @@ namespace ImportAndPreviewApi.Repository
 
 					foreach (var item in groupedItems)
 					{
-						var firstInRecordOfTheDay = item.groupedValue.Where(x => x.ReaderId == 1).Aggregate((i1, i2) => i1.EventDateTime < i2.EventDateTime ? i1 : i2);
-						var lastOutRecordOfTheDay = item.groupedValue.Where(x => x.ReaderId == 2).Aggregate((i1, i2) => i1.EventDateTime > i2.EventDateTime ? i1 : i2);
+						var firstInRecordOfTheDay = item.groupedValue.Where(x => x.ReaderId == 1).Count() > 0 ? item.groupedValue.Where(x => x.ReaderId == 1).Aggregate((i1, i2) => i1.EventDateTime < i2.EventDateTime ? i1 : i2) : null;
+						var lastOutRecordOfTheDay = item.groupedValue.Where(x => x.ReaderId == 2).Count() > 0 ? item.groupedValue.Where(x => x.ReaderId == 2).Aggregate((i1, i2) => i1.EventDateTime > i2.EventDateTime ? i1 : i2) : null;
 
-						rptAggregateList.Add(new ReportAggregate
-						{
-							CardNumber = item.groupingKey,
-							CardName = firstInRecordOfTheDay.CardName,
-							EventDate = new DateTime(year: year, month: month, day: day),
-							Location = firstInRecordOfTheDay.Location,
-							InTime = firstInRecordOfTheDay.EventDateTime.ToShortTimeString(),
-							OutTime = lastOutRecordOfTheDay.EventDateTime.ToShortTimeString(),
-							TotalHours = Math.Round((lastOutRecordOfTheDay.EventDateTime - firstInRecordOfTheDay.EventDateTime).TotalHours, 2)
+					rptAggregateList.Add(new ReportAggregate
+					{
+						EmployeeName = item.groupedValue[0].EmployeeName,
+						EmployeeCode = item.groupedValue[0].EmployeeCode,
+						EventDate = new DateTime(year: year, month: month, day: day),
+						Location = item.groupedValue[0].Location,
+						InTime = firstInRecordOfTheDay != null ? firstInRecordOfTheDay.EventDateTime.ToShortTimeString() : "",
+						OutTime = lastOutRecordOfTheDay != null ? lastOutRecordOfTheDay.EventDateTime.ToShortTimeString() : "",
+						TotalHours = firstInRecordOfTheDay != null && lastOutRecordOfTheDay != null ? Math.Round((lastOutRecordOfTheDay.EventDateTime - firstInRecordOfTheDay.EventDateTime).TotalHours, 2) : 0
 						});
 					}
 				//}
@@ -126,16 +115,11 @@ namespace ImportAndPreviewApi.Repository
 		public IList<ReportAggregate> GetReportAggregateByCardNumberAndMonth(int cardNumber, int month, int year) {
 			IList<ReportAggregate> rptAggregateList = new List<ReportAggregate>();
 
-			//ReportEntity rptEntity = null;
 			string interimFirstInTime;
 			string interimLastOutTime;
 
 			try
 			{
-				//rptEntity = db.Report.FirstOrDefault(report => report.Month == month && report.Year == year);
-
-				//if (rptEntity != null) 
-				//{
 					var filteredData = (from rd in db.ReportData
 										where //rd.ReportId == rptEntity.ReportId &&
 										rd.CardNumber == cardNumber
@@ -182,8 +166,8 @@ namespace ImportAndPreviewApi.Repository
 
 							rptAggregateList.Add(new ReportAggregate
 								{
-									CardNumber = filteredData[0].CardNumber,
-									CardName = filteredData[0].CardName,
+									EmployeeName = filteredData[0].EmployeeName,
+									EmployeeCode = filteredData[0].EmployeeCode,
 									EventDate = new DateTime(year: year, month: month, day: processingDay),
 									Location = firstInRecordOfTheDay != null ? firstInRecordOfTheDay.Location : (lastOutRecordOfTheDay != null ? lastOutRecordOfTheDay.Location : string.Empty),//filteredData[0].Location,
 									InTime = interimFirstInTime,
@@ -196,6 +180,125 @@ namespace ImportAndPreviewApi.Repository
 				return rptAggregateList;
 			}
 			catch(Exception ex) {
+				throw ex;
+			}
+		}
+
+		/// <summary>
+		/// Method to get Aggregated report for all cards per given card, month and year
+		/// </summary>
+		/// <param name="month">Month</param>
+		/// <param name="year">Year</param>
+		/// <param name="filterValue">Filter Value</param>
+		/// <returns>Aggregated report for all cards per given card, month and year</returns>
+		public IList<EmployeeAttendance> GetReportAggregatedByMonth(int month, int year, string filterValue)
+		{
+			IList<EmployeeAttendance> userAttendanceList = new List<EmployeeAttendance>();
+			string interimFirstInTime;
+			string interimLastOutTime;
+
+			try 
+			{
+				List<ReportDataEntity> filteredData = null;
+				if (filterValue != string.Empty)
+				{
+					filteredData = (from rd in db.ReportData
+									where
+									(rd.EmployeeName.StartsWith(filterValue) || rd.EmployeeCode.StartsWith(filterValue))
+									&& rd.EventDateTime.Month == month
+									&& rd.EventDateTime.Year == year
+									select rd).ToList();
+				}
+				else
+				{
+					filteredData = (from rd in db.ReportData
+									where rd.EventDateTime.Month == month
+									&& rd.EventDateTime.Year == year
+									select rd
+											).ToList();
+				}
+
+				if (filteredData != null && filteredData.Count > 0)
+				{
+					var groupedData = (from fd in filteredData
+									   group fd by fd.CardNumber into fdGrouped
+									   select new
+									   {
+										   groupingKey = fdGrouped.Key,
+										   groupedValue = fdGrouped.ToList()
+									   }).ToList();
+
+					int numberOfDaysInMonth = DateTime.DaysInMonth(year, month);
+
+					foreach (var groupedItem in groupedData)
+					{
+						double aggregatedHours = 0;
+
+						IList<SwipeInfo> swipeInfoCollection = new List<SwipeInfo>();
+
+						for (int processingDay = 1; processingDay <= numberOfDaysInMonth; processingDay++)
+						{
+							double totalHoursInADay = 0;
+
+							interimFirstInTime = string.Empty;
+							interimLastOutTime = string.Empty;
+
+							var firstInRecordOfTheDay = (from gi in groupedItem.groupedValue
+														 where gi.EventDateTime.Day == processingDay
+														 && gi.EventDateTime.Month == month
+														 && gi.EventDateTime.Year == year
+														 && gi.ReaderId == 1
+														 orderby gi.EventDateTime ascending
+														 select gi
+													).FirstOrDefault();
+
+							var lastOutRecordOfTheDay = (from gi in groupedItem.groupedValue
+														 where gi.EventDateTime.Day == processingDay
+														 && gi.EventDateTime.Month == month
+														 && gi.EventDateTime.Year == year
+														 && gi.ReaderId == 2
+														 orderby gi.EventDateTime descending
+														 select gi
+													).FirstOrDefault();
+
+							if (firstInRecordOfTheDay != null)
+							{
+								interimFirstInTime = firstInRecordOfTheDay.EventDateTime.ToShortTimeString();
+							}
+
+							if (lastOutRecordOfTheDay != null)
+							{
+								interimLastOutTime = lastOutRecordOfTheDay.EventDateTime.ToShortTimeString();
+							}
+
+							totalHoursInADay = (firstInRecordOfTheDay != null && lastOutRecordOfTheDay != null) ? Math.Round((lastOutRecordOfTheDay.EventDateTime - firstInRecordOfTheDay.EventDateTime).TotalHours, 2) : 0;
+							
+							// Sum up total ours in a day to compute aggregate for a month
+							aggregatedHours += totalHoursInADay;
+
+							swipeInfoCollection.Add(new SwipeInfo()
+							{
+								EventDate =  new DateTime(year: year, month: month, day: processingDay),
+								Location = firstInRecordOfTheDay != null ? firstInRecordOfTheDay.Location : (lastOutRecordOfTheDay != null ? lastOutRecordOfTheDay.Location : string.Empty),
+								InTime = interimFirstInTime,
+								OutTime = interimLastOutTime,
+								TotalHours = totalHoursInADay
+							});
+						}
+
+						userAttendanceList.Add(new EmployeeAttendance
+						{
+							EmployeeName = groupedItem.groupedValue[0].EmployeeName,
+							EmployeeCode = groupedItem.groupedValue[0].EmployeeCode,
+							AggregatedHours = aggregatedHours,
+							SwipeInfoCollection = swipeInfoCollection
+						});
+					}
+				}
+				return userAttendanceList;
+			}
+			catch(Exception ex) 
+			{
 				throw ex;
 			}
 		}
@@ -238,7 +341,9 @@ namespace ImportAndPreviewApi.Repository
 							In = reportData.In,
 							Out = reportData.Out,
 							Affiliation = reportData.Affiliation,
-							AlarmText = reportData.AlarmText
+							AlarmText = reportData.AlarmText,
+							EmployeeName = ExtractEmployeeFirstName(reportData.CardName) + " " + ExtractEmployeeLastName(reportData.CardName),
+							EmployeeCode = ExtractEmployeeCode(reportData.CardName)
 						};
 
 						db.ReportData.Add(rptDataEntity);
@@ -252,6 +357,37 @@ namespace ImportAndPreviewApi.Repository
 				throw ex;
 			}
 			return isReportDataSaved;
+		}
+
+		private string ExtractEmployeeFirstName(string cardName) {
+			string firstName = string.Empty;
+
+			int indexOfFirstDigit = cardName.IndexOfAny("0123456789".ToCharArray());
+
+			firstName = cardName.Substring(0, indexOfFirstDigit - 1);
+			return firstName;
+		}
+
+		private string ExtractEmployeeLastName(string cardName)
+		{
+			string lastName = string.Empty;
+
+			int indexOfLastDigit = cardName.LastIndexOfAny("0123456789".ToCharArray());
+
+			lastName = cardName.Substring(indexOfLastDigit + 2);
+			return lastName;
+		}
+
+		private string ExtractEmployeeCode(string cardName)
+		{
+			string employeeCode = string.Empty;
+
+			int indexOfFirstDigit = cardName.IndexOfAny("0123456789".ToCharArray());
+			int indexOfLastDigit = cardName.LastIndexOfAny("0123456789".ToCharArray());
+
+			employeeCode = cardName.Substring(indexOfFirstDigit, (indexOfLastDigit - indexOfFirstDigit) + 1);
+
+			return employeeCode;
 		}
 	}
 }

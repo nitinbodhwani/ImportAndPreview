@@ -47,6 +47,18 @@ namespace ImportAndPreviewApi.Repository
 		}
 
 		/// <summary>
+		/// Method to get Aggregated report for all cards per given card, month and year
+		/// </summary>
+		/// <param name="month">Month</param>
+		/// <param name="year">Year</param>
+		/// <param name="filterValue">Filter Value</param>
+		/// <returns>Aggregated report for all cards per given card, month and year</returns>
+		public IList<EmployeeAttendance> GetReportAggregatedByMonth(int month, int year, string filterValue)
+		{
+			return PersistenceRepository.GetReportAggregatedByMonth(month, year, filterValue);
+		}
+
+		/// <summary>
 		/// Method to Save Report Data
 		/// </summary>
 		/// <param name="report">Report</param>

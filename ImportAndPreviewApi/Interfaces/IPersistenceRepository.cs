@@ -39,5 +39,14 @@ namespace ImportAndPreviewApi.Interfaces
 		/// <returns>Aggregated report for all cards per given card and month</returns>
 
 		IList<ReportAggregate> GetReportAggregateByCardNumberAndMonth(int cardNumber, int month, int year);
+
+		/// <summary>
+		/// Method to get Aggregated report for all cards per given card, month and year
+		/// </summary>
+		/// <param name="month">Month</param>
+		/// <param name="year">Year</param>
+		/// <param name="filterValue">Filter Value</param>
+		/// <returns>Aggregated report for all cards per given card, month and year</returns>
+		IList<EmployeeAttendance> GetReportAggregatedByMonth(int month, int year, string filterValue);
 	}
 }

@@ -93,6 +93,31 @@ namespace ImportAndPreviewApi.Controllers
 		}
 
 		/// <summary>
+		/// Api method to get report aggregate for given card and month
+		/// </summary>
+		/// <param name="month">Month</param>
+		/// <param name="year">Year</param>
+		/// <param name="filterValue">Filter Value</param>
+		/// <returns>Aggregated report for all cards per given card, month and year</returns>
+
+		// Get: api/report/aggregate/03/2018/21333
+		[Route("aggregate")]
+		[HttpGet]
+		public IHttpActionResult GetReportAggregatedByMonth(int month, int year, string filterValue = "")
+		{
+			IList<EmployeeAttendance> rptAggregateList = null;
+			try
+			{
+				rptAggregateList = BusinessRepository.GetReportAggregatedByMonth(month, year, filterValue);
+				return Ok(rptAggregateList);
+			}
+			catch (Exception ex)
+			{
+				return InternalServerError(ex);
+			}
+		}
+
+		/// <summary>
 		/// Api method for saving report data
 		/// </summary>
 		/// <param name="report">Report content</param>
