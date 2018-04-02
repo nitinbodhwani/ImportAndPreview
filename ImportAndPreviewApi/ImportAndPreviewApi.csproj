@@ -176,11 +176,17 @@
     <Compile Include="Migrations\201803281434531_Report Entity Correction.Designer.cs">
       <DependentUpon>201803281434531_Report Entity Correction.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201803300949411_Adding EmployeeName and EmployeeCode information in ReportDataEntity table.cs" />
+    <Compile Include="Migrations\201803300949411_Adding EmployeeName and EmployeeCode information in ReportDataEntity table.Designer.cs">
+      <DependentUpon>201803300949411_Adding EmployeeName and EmployeeCode information in ReportDataEntity table.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Reader.cs" />
     <Compile Include="Models\Report.cs" />
     <Compile Include="Models\ReportAggregate.cs" />
     <Compile Include="Models\ReportData.cs" />
+    <Compile Include="Models\SwipeInfo.cs" />
+    <Compile Include="Models\EmployeeAttendance.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repository\BusinessRepository.cs" />
     <Compile Include="Repository\PersistenceRepository.cs" />
@@ -212,6 +218,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201803281434531_Report Entity Correction.resx">
       <DependentUpon>201803281434531_Report Entity Correction.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201803300949411_Adding EmployeeName and EmployeeCode information in ReportDataEntity table.resx">
+      <DependentUpon>201803300949411_Adding EmployeeName and EmployeeCode information in ReportDataEntity table.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
