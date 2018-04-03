@@ -7,6 +7,7 @@ namespace ImportAndPreviewApi.Models
 		public string EmployeeName { get; set; }
 		public string EmployeeCode { get; set; }
 		public double AggregatedHours { get; set; }
+		public int MEP { get; set; }
 		public IList<SwipeInfo> SwipeInfoCollection { get; set; }
 	}
 }

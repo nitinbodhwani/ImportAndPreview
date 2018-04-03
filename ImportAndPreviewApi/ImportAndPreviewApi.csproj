@@ -168,19 +168,6 @@
     </Compile>
     <Compile Include="Interfaces\IBusinessRepository.cs" />
     <Compile Include="Interfaces\IPersistenceRepository.cs" />
-    <Compile Include="Migrations\201803191301146_InitialCreate.cs" />
-    <Compile Include="Migrations\201803191301146_InitialCreate.Designer.cs">
-      <DependentUpon>201803191301146_InitialCreate.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201803281434531_Report Entity Correction.cs" />
-    <Compile Include="Migrations\201803281434531_Report Entity Correction.Designer.cs">
-      <DependentUpon>201803281434531_Report Entity Correction.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201803300949411_Adding EmployeeName and EmployeeCode information in ReportDataEntity table.cs" />
-    <Compile Include="Migrations\201803300949411_Adding EmployeeName and EmployeeCode information in ReportDataEntity table.Designer.cs">
-      <DependentUpon>201803300949411_Adding EmployeeName and EmployeeCode information in ReportDataEntity table.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Reader.cs" />
     <Compile Include="Models\Report.cs" />
     <Compile Include="Models\ReportAggregate.cs" />
@@ -211,17 +198,6 @@
       <DependentUpon>Web.config</DependentUpon>
     </Content>
     <Content Include="Scripts\_references.js" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Migrations\201803191301146_InitialCreate.resx">
-      <DependentUpon>201803191301146_InitialCreate.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201803281434531_Report Entity Correction.resx">
-      <DependentUpon>201803281434531_Report Entity Correction.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201803300949411_Adding EmployeeName and EmployeeCode information in ReportDataEntity table.resx">
-      <DependentUpon>201803300949411_Adding EmployeeName and EmployeeCode information in ReportDataEntity table.cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />

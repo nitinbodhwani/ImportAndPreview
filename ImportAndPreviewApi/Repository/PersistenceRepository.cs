@@ -233,6 +233,7 @@ namespace ImportAndPreviewApi.Repository
 					foreach (var groupedItem in groupedData)
 					{
 						double aggregatedHours = 0;
+						int monthlyEarnedPoints = 0;
 
 						IList<SwipeInfo> swipeInfoCollection = new List<SwipeInfo>();
 
@@ -272,6 +273,10 @@ namespace ImportAndPreviewApi.Repository
 							}
 
 							totalHoursInADay = (firstInRecordOfTheDay != null && lastOutRecordOfTheDay != null) ? Math.Round((lastOutRecordOfTheDay.EventDateTime - firstInRecordOfTheDay.EventDateTime).TotalHours, 2) : 0;
+
+							if(totalHoursInADay >= 6) {
+								monthlyEarnedPoints++;
+							}
 							
 							// Sum up total ours in a day to compute aggregate for a month
 							aggregatedHours += totalHoursInADay;
@@ -290,7 +295,8 @@ namespace ImportAndPreviewApi.Repository
 						{
 							EmployeeName = groupedItem.groupedValue[0].EmployeeName,
 							EmployeeCode = groupedItem.groupedValue[0].EmployeeCode,
-							AggregatedHours = aggregatedHours,
+							AggregatedHours = Math.Round(aggregatedHours, 2),
+							MEP = monthlyEarnedPoints,
 							SwipeInfoCollection = swipeInfoCollection
 						});
 					}
@@ -374,7 +380,10 @@ namespace ImportAndPreviewApi.Repository
 
 			int indexOfLastDigit = cardName.LastIndexOfAny("0123456789".ToCharArray());
 
-			lastName = cardName.Substring(indexOfLastDigit + 2);
+			if (cardName.Length > indexOfLastDigit + 2)
+			{
+				lastName = cardName.Substring(indexOfLastDigit + 2);
+			}
 			return lastName;
 		}
 
