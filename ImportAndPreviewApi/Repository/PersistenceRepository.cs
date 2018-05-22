@@ -234,12 +234,20 @@ namespace ImportAndPreviewApi.Repository
 					{
 						double aggregatedHours = 0;
 						int monthlyEarnedPoints = 0;
+						int totalWorkingDaysCount = 0;
 
 						IList<SwipeInfo> swipeInfoCollection = new List<SwipeInfo>();
 
 						for (int processingDay = 1; processingDay <= numberOfDaysInMonth; processingDay++)
 						{
 							double totalHoursInADay = 0;
+
+							string dayOfWeek = new DateTime(year, month, processingDay).DayOfWeek.ToString().ToLower();
+
+							if (!dayOfWeek.Equals("saturday") && !dayOfWeek.Equals("sunday"))
+							{
+								totalWorkingDaysCount++;
+							}
 
 							interimFirstInTime = string.Empty;
 							interimLastOutTime = string.Empty;
@@ -297,10 +305,17 @@ namespace ImportAndPreviewApi.Repository
 							EmployeeCode = groupedItem.groupedValue[0].EmployeeCode,
 							AggregatedHours = Math.Round(aggregatedHours, 2),
 							MEP = monthlyEarnedPoints,
+							TDC = totalWorkingDaysCount,
 							SwipeInfoCollection = swipeInfoCollection
 						});
 					}
 				}
+				
+				if (userAttendanceList != null && userAttendanceList.Count > 0)
+				{
+					userAttendanceList = userAttendanceList.OrderBy(user => user.EmployeeName).ToList();
+				}
+
 				return userAttendanceList;
 			}
 			catch(Exception ex) 
@@ -368,9 +383,22 @@ namespace ImportAndPreviewApi.Repository
 		private string ExtractEmployeeFirstName(string cardName) {
 			string firstName = string.Empty;
 
-			int indexOfFirstDigit = cardName.IndexOfAny("0123456789".ToCharArray());
+			if (cardName != null && cardName != string.Empty)
+			{
+				try
+				{
+					int indexOfFirstDigit = cardName.IndexOfAny("0123456789".ToCharArray());
+					if (indexOfFirstDigit > 0)
+					{
+						firstName = cardName.Substring(0, indexOfFirstDigit - 1);
+					}
+				}
+				catch (Exception ex)
+				{
+					throw ex;
+				}
+			}
 
-			firstName = cardName.Substring(0, indexOfFirstDigit - 1);
 			return firstName;
 		}
 
@@ -378,11 +406,17 @@ namespace ImportAndPreviewApi.Repository
 		{
 			string lastName = string.Empty;
 
-			int indexOfLastDigit = cardName.LastIndexOfAny("0123456789".ToCharArray());
-
-			if (cardName.Length > indexOfLastDigit + 2)
+			if (cardName != null && cardName != string.Empty)
 			{
-				lastName = cardName.Substring(indexOfLastDigit + 2);
+				int indexOfLastDigit = cardName.LastIndexOfAny("0123456789".ToCharArray());
+
+				if (indexOfLastDigit > 0)
+				{
+					if (cardName.Length > indexOfLastDigit + 2)
+					{
+						lastName = cardName.Substring(indexOfLastDigit + 2);
+					}
+				}
 			}
 			return lastName;
 		}
@@ -391,10 +425,16 @@ namespace ImportAndPreviewApi.Repository
 		{
 			string employeeCode = string.Empty;
 
-			int indexOfFirstDigit = cardName.IndexOfAny("0123456789".ToCharArray());
-			int indexOfLastDigit = cardName.LastIndexOfAny("0123456789".ToCharArray());
+			if (cardName != null && cardName != string.Empty)
+			{
+				int indexOfFirstDigit = cardName.IndexOfAny("0123456789".ToCharArray());
+				int indexOfLastDigit = cardName.LastIndexOfAny("0123456789".ToCharArray());
 
-			employeeCode = cardName.Substring(indexOfFirstDigit, (indexOfLastDigit - indexOfFirstDigit) + 1);
+				if (indexOfFirstDigit > 0 && indexOfLastDigit > 0)
+				{
+					employeeCode = cardName.Substring(indexOfFirstDigit, (indexOfLastDigit - indexOfFirstDigit) + 1);
+				}
+			}
 
 			return employeeCode;
 		}
